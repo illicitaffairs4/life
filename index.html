@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Life XP">
+<title>Life XP</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a18;min-height:100vh}
+.app{max-width:680px;margin:0 auto;padding:1.25rem 1rem 4rem}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.hdr h1{font-size:22px;font-weight:600;color:#1a1a18}
+.hdr p{font-size:12px;color:#888;margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.1rem}
+.stat{background:#fff;border-radius:10px;padding:0.75rem 0.9rem;border:0.5px solid rgba(0,0,0,0.08)}
+.sl{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.sv{font-size:20px;font-weight:600;color:#1a1a18}
+.sv.pos{color:#0F6E56}.sv.neg{color:#c0392b}
+.pb-wrap{margin-bottom:1.1rem}
+.pb-lbl{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:5px}
+.pb-bg{height:7px;background:#e8e8e4;border-radius:999px;overflow:hidden}
+.pb-fill{height:100%;background:#1D9E75;border-radius:999px;transition:width .4s}
+.tabs{display:flex;gap:2px;border-bottom:1px solid #e8e8e4;margin-bottom:1.1rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-size:12px;padding:8px 12px;border:none;background:transparent;color:#888;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;border-radius:0}
+.tab.active{color:#1a1a18;font-weight:600;border-bottom-color:#7F77DD}
+.view{display:none}.view.active{display:block}
+.stitle{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin:1.1rem 0 .5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-bottom:.4rem}
+.abtn{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:10px;cursor:pointer;gap:8px;transition:background .12s;-webkit-tap-highlight-color:transparent}
+.abtn:active{background:#f0f0ec}
+.abtn.logged{border-color:#1D9E75;background:#e8f7f1}
+.abtn.pen:active{background:#fdf0f0}
+.abtn.pen.logged{border-color:#c0392b;background:#fdf0f0}
+.aname{font-size:12px;color:#1a1a18;flex:1;line-height:1.35;text-align:left}
+.abtn.logged .aname{color:#085041}
+.abtn.pen.logged .aname{color:#8b1a1a}
+.apts{font-size:12px;font-weight:600;white-space:nowrap}
+.apts.pos{color:#0F6E56}.apts.neg{color:#c0392b}
+.li{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #e8e8e4}
+.li:last-child{border-bottom:none}
+.li-name{font-size:13px;color:#1a1a18}
+.li-time{font-size:11px;color:#aaa}
+.ubtn{font-size:11px;color:#aaa;background:none;border:0.5px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer}
+.empty{text-align:center;padding:2.5rem 1rem;color:#aaa;font-size:13px}
+.wg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:.6rem 0 .4rem}
+.dc{text-align:center;padding:8px 3px;border-radius:10px;background:#fff;border:0.5px solid rgba(0,0,0,0.08)}
+.dn{font-size:10px;color:#aaa;text-transform:uppercase;margin-bottom:3px}
+.dp{font-size:13px;font-weight:600;color:#1a1a18}
+.dc.today{border:2px solid #7F77DD}
+.dc.win{background:#e8f7f1}.dc.win .dp{color:#085041}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #e8e8e4;font-size:13px}
+.rr:last-child{border-bottom:none}
+.rpts{font-weight:600}.rpts.pos{color:#0F6E56}.rpts.neg{color:#c0392b}
+.rbtn{font-size:12px;color:#aaa;background:#fff;border:0.5px solid #ddd;border-radius:8px;padding:4px 10px;cursor:pointer}
+/* mood */
+.mood-card{background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+.mood-card h3{font-size:15px;font-weight:600;color:#1a1a18;margin-bottom:1rem}
+.emoji-row{display:flex;gap:6px;justify-content:space-between;margin-bottom:1rem}
+.ebtn{flex:1;padding:10px 3px;border:0.5px solid #e8e8e4;border-radius:10px;text-align:center;cursor:pointer;background:#f5f5f0;-webkit-tap-highlight-color:transparent}
+.ebtn.active{background:#EEEDFE;border-color:#7F77DD}
+.eico{font-size:20px}
+.elbl{font-size:10px;color:#aaa;margin-top:3px}
+.ebtn.active .elbl{color:#534AB7}
+.srow{display:flex;align-items:center;gap:10px;margin-bottom:.65rem}
+.srow label{font-size:12px;color:#666;min-width:82px}
+.srow input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:999px;background:#e8e8e4;outline:none}
+.srow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#7F77DD;cursor:pointer}
+.sval{font-size:13px;font-weight:600;color:#1a1a18;min-width:20px;text-align:right}
+.tag-wrap{display:flex;flex-wrap:wrap;gap:6px;margin:.4rem 0 .9rem}
+.mtag{font-size:12px;padding:5px 12px;border-radius:999px;border:0.5px solid #ddd;background:#f5f5f0;color:#666;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mtag.active{background:#EEEDFE;border-color:#7F77DD;color:#3C3489}
+.mnote{width:100%;font-size:13px;padding:10px 12px;border:0.5px solid #ddd;border-radius:10px;background:#fff;color:#1a1a18;resize:none;font-family:inherit}
+.save-btn{width:100%;margin-top:1rem;padding:12px;background:#7F77DD;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.save-btn:active{background:#534AB7}
+.mood-hist-item{background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:.9rem 1rem;margin-bottom:.6rem}
+.mhi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.mhi-date{font-size:13px;font-weight:600;color:#1a1a18}
+.mhi-emoji{font-size:18px}
+.mhi-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:.5rem}
+.mhi-bar{text-align:center}
+.mhi-bl{font-size:10px;color:#aaa;margin-bottom:2px}
+.mhi-bv{font-size:13px;font-weight:600;color:#1a1a18}
+.mhi-tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;background:#EEEDFE;color:#3C3489;margin-right:4px;margin-bottom:4px}
+.mhi-note{font-size:12px;color:#666;margin-top:.4rem;line-height:1.5;font-style:italic}
+.chart-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chart-lbl{font-size:11px;color:#888;min-width:78px;text-align:right}
+.chart-bar-bg{flex:1;height:14px;background:#e8e8e4;border-radius:999px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:999px;transition:width .4s}
+.chart-val{font-size:11px;color:#aaa;min-width:24px}
+.corr-card{background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:.85rem 1rem;margin-bottom:.5rem}
+.corr-title{font-size:13px;font-weight:600;color:#1a1a18;margin-bottom:3px}
+.corr-sub{font-size:12px;color:#666;line-height:1.5}
+.note-small{font-size:11px;color:#aaa;margin-top:.5rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div><h1>Life XP</h1><p id="date-lbl"></p></div>
+    <button class="rbtn" onclick="resetDay()">Reset today</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="sl">Today</div><div class="sv" id="s-today">0</div></div>
+    <div class="stat"><div class="sl">This week</div><div class="sv" id="s-week">0</div></div>
+    <div class="stat"><div class="sl">Goal</div><div class="sv">35</div></div>
+    <div class="stat"><div class="sl">Best day</div><div class="sv" id="s-best">0</div></div>
+  </div>
+  <div class="pb-wrap">
+    <div class="pb-lbl"><span>Weekly progress</span><span id="pb-lbl">0 / 35</span></div>
+    <div class="pb-bg"><div class="pb-fill" id="pb-fill" style="width:0%"></div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw('log',this)">Log</button>
+    <button class="tab" onclick="sw('today',this)">Today</button>
+    <button class="tab" onclick="sw('mood',this)">Mood</button>
+    <button class="tab" onclick="sw('insights',this)">Insights</button>
+    <button class="tab" onclick="sw('week',this)">Week</button>
+    <button class="tab" onclick="sw('rules',this)">Rules</button>
+  </div>
+
+  <div id="view-log" class="view active">
+    <div class="stitle">Mind</div><div class="grid" id="g-mind"></div>
+    <div class="stitle">Body</div><div class="grid" id="g-body"></div>
+    <div class="stitle">Career & German</div><div class="grid" id="g-career"></div>
+    <div class="stitle">Joy & soul</div><div class="grid" id="g-joy"></div>
+    <div class="stitle">Inner work</div><div class="grid" id="g-shadow"></div>
+    <div class="stitle">Morning rituals</div><div class="grid" id="g-morning"></div>
+    <div class="stitle">Penalties</div><div class="grid" id="g-penalty"></div>
+  </div>
+
+  <div id="view-today" class="view">
+    <div class="stitle">Logged today</div>
+    <div id="log-list"></div>
+  </div>
+
+  <div id="view-mood" class="view">
+    <div class="mood-card">
+      <h3>Evening check-in</h3>
+      <div class="emoji-row" id="emoji-row">
+        <div class="ebtn" onclick="pickEmoji(this,'awful',1)"><div class="eico">😞</div><div class="elbl">awful</div></div>
+        <div class="ebtn" onclick="pickEmoji(this,'low',3)"><div class="eico">😕</div><div class="elbl">low</div></div>
+        <div class="ebtn" onclick="pickEmoji(this,'meh',5)"><div class="eico">😐</div><div class="elbl">meh</div></div>
+        <div class="ebtn" onclick="pickEmoji(this,'good',7)"><div class="eico">🙂</div><div class="elbl">good</div></div>
+        <div class="ebtn" onclick="pickEmoji(this,'great',9)"><div class="eico">😄</div><div class="elbl">great</div></div>
+      </div>
+      <div class="srow"><label>Overall mood</label><input type="range" min="1" max="10" value="5" step="1" id="sl-mood" oninput="document.getElementById('sv-mood').textContent=this.value"><span class="sval" id="sv-mood">5</span></div>
+      <div class="srow"><label>Energy</label><input type="range" min="1" max="10" value="5" step="1" id="sl-energy" oninput="document.getElementById('sv-energy').textContent=this.value"><span class="sval" id="sv-energy">5</span></div>
+      <div class="srow"><label>Anxiety</label><input type="range" min="1" max="10" value="5" step="1" id="sl-anxiety" oninput="document.getElementById('sv-anxiety').textContent=this.value"><span class="sval" id="sv-anxiety">5</span></div>
+      <div class="srow"><label>Confidence</label><input type="range" min="1" max="10" value="5" step="1" id="sl-conf" oninput="document.getElementById('sv-conf').textContent=this.value"><span class="sval" id="sv-conf">5</span></div>
+      <div style="font-size:11px;color:#aaa;margin:.75rem 0 .4rem">How would you describe today? (pick one)</div>
+      <div class="tag-wrap" id="mood-tags">
+        <span class="mtag" onclick="pickTag(this)">motivated</span>
+        <span class="mtag" onclick="pickTag(this)">calm</span>
+        <span class="mtag" onclick="pickTag(this)">anxious</span>
+        <span class="mtag" onclick="pickTag(this)">grateful</span>
+        <span class="mtag" onclick="pickTag(this)">tired</span>
+        <span class="mtag" onclick="pickTag(this)">proud</span>
+        <span class="mtag" onclick="pickTag(this)">disconnected</span>
+        <span class="mtag" onclick="pickTag(this)">joyful</span>
+        <span class="mtag" onclick="pickTag(this)">restless</span>
+        <span class="mtag" onclick="pickTag(this)">focused</span>
+        <span class="mtag" onclick="pickTag(this)">overwhelmed</span>
+        <span class="mtag" onclick="pickTag(this)">content</span>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:.5rem">One sentence about today (optional)</div>
+      <textarea class="mnote" id="mood-note" rows="2" placeholder="e.g. felt really good after the walk, struggled with focus in the evening..."></textarea>
+      <button class="save-btn" onclick="saveMood()">Save today's mood</button>
+    </div>
+    <div class="stitle">Mood history</div>
+    <div id="mood-history"></div>
+  </div>
+
+  <div id="view-insights" class="view">
+    <div class="stitle">Average scores — last 7 entries</div>
+    <div id="avg-bars"></div>
+    <div class="stitle">Points vs mood</div>
+    <div id="corr-section"></div>
+    <div class="stitle">Most common mood tags</div>
+    <div id="tag-freq"></div>
+  </div>
+
+  <div id="view-week" class="view">
+    <div class="stitle">Points this week</div>
+    <div class="wg" id="week-grid"></div>
+    <p class="note-small">Green = daily target (5 pts) reached. Purple border = today.</p>
+  </div>
+
+  <div id="view-rules" class="view">
+    <div class="stitle">Earning points</div><div id="rules-earn"></div>
+    <div class="stitle">Penalties</div><div id="rules-lose"></div>
+    <p class="note-small" style="margin-top:1rem">Weekly goal: 35 pts · Daily target: 5 pts · Activities can be logged multiple times per day</p>
+  </div>
+</div>
+
+<script>
+const ACTS=[
+  {id:'read20',cat:'mind',name:'Read 20 pages',pts:2},
+  {id:'read40',cat:'mind',name:'Read 40+ pages',pts:3},
+  {id:'chess',cat:'mind',name:'2 games of chess',pts:2},
+  {id:'sudoku',cat:'mind',name:'Sudoku / logic puzzle',pts:1},
+  {id:'article',cat:'mind',name:'Read a long-form article',pts:2},
+  {id:'catexplain',cat:'mind',name:'Explain concept to your cat',pts:4},
+  {id:'deepdive',cat:'mind',name:'Deep dive on a new topic (45+ min)',pts:3},
+  {id:'podcast',cat:'mind',name:'Educational podcast (no multitasking)',pts:2},
+  {id:'workout',cat:'body',name:'Full workout (gym / pole)',pts:4},
+  {id:'walk',cat:'body',name:'Walk 30+ min',pts:2},
+  {id:'sleep8',cat:'body',name:'8+ hours sleep',pts:2},
+  {id:'nophone',cat:'body',name:'No phone first 30 min of day',pts:3},
+  {id:'meal',cat:'body',name:'Prepared a proper meal (not ordered)',pts:2},
+  {id:'stretch',cat:'body',name:'Stretching / mobility (20+ min)',pts:2},
+  {id:'supps',cat:'body',name:'Took supplements consistently',pts:1},
+  {id:'german20',cat:'career',name:'German — 20 min',pts:3},
+  {id:'workvis',cat:'career',name:'Visible contribution at work',pts:3},
+  {id:'masters',cat:'career',name:'Worked on master\'s thesis / coursework',pts:2},
+  {id:'skill',cat:'career',name:'Learned one concrete work skill',pts:3},
+  {id:'deepconvo',cat:'joy',name:'Deep 1-on-1 conversation',pts:2},
+  {id:'nature',cat:'joy',name:'Time in nature (30+ min, no phone)',pts:3},
+  {id:'newexp',cat:'joy',name:'New experience (place, food, activity)',pts:3},
+  {id:'livemusic',cat:'joy',name:'Live music or cultural event',pts:3},
+  {id:'friend',cat:'joy',name:'Quality time with a close friend',pts:2},
+  {id:'creative',cat:'joy',name:'Creative activity (writing, art, dancing)',pts:3},
+  {id:'mango',cat:'joy',name:'Take Mango on a walk',pts:3},
+  {id:'shadow1',cat:'shadow',name:'Journaling on a trigger or reaction',pts:3},
+  {id:'therapy',cat:'shadow',name:'Therapy / coaching session',pts:3},
+  {id:'meditate',cat:'shadow',name:'Meditation (15+ min)',pts:3},
+  {id:'gratitude',cat:'shadow',name:'Gratitude practice (written, 5 items)',pts:2},
+  {id:'evidence',cat:'shadow',name:'Added to personal evidence file',pts:2},
+  {id:'needask',cat:'shadow',name:'Asked for a need directly (no hinting)',pts:2},
+  {id:'decide',cat:'shadow',name:'Made a decision without seeking validation',pts:3},
+  {id:'stoicism',cat:'shadow',name:'Stoicism practice',pts:2},
+  {id:'breakfast',cat:'morning',name:'Eat breakfast',pts:2},
+  {id:'journalgen',cat:'morning',name:'Journaling',pts:2},
+  {id:'dance',cat:'morning',name:'Dance / sing in the morning',pts:2},
+  {id:'oilpull',cat:'morning',name:'Oil pulling',pts:1},
+  {id:'p-tiktok',cat:'penalty',name:'TikTok 20+ min',pts:-3},
+  {id:'p-insta',cat:'penalty',name:'Instagram 20+ min',pts:-3},
+  {id:'p-phone5',cat:'penalty',name:'Screen time 5+ hours',pts:-3},
+  {id:'p-compare',cat:'penalty',name:'Compared myself online and felt worse',pts:-2},
+  {id:'p-avoid',cat:'penalty',name:'Avoided something I said I\'d do',pts:-3},
+  {id:'p-validation',cat:'penalty',name:'Asked for validation before deciding',pts:-2},
+  {id:'p-complain',cat:'penalty',name:'Complained without taking action',pts:-2},
+  {id:'p-selftalk',cat:'penalty',name:'Talked down to myself unchallenged',pts:-2},
+  {id:'p-spiral',cat:'penalty',name:'Overthought a decision 20+ min',pts:-2},
+  {id:'p-junk',cat:'penalty',name:'Skipped proper meal / ate junk',pts:-2},
+  {id:'p-midnight',cat:'penalty',name:'Went to bed after midnight',pts:-2},
+  {id:'p-morning',cat:'penalty',name:'Skipped morning routine',pts:-3},
+  {id:'p-workout',cat:'penalty',name:'Skipped planned workout',pts:-2},
+  {id:'p-overgive',cat:'penalty',name:'Said yes when I wanted to say no',pts:-2},
+  {id:'p-german',cat:'penalty',name:'Skipped German entirely',pts:-2},
+];
+
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const KEY='lifexp_v3';
+let moodEmoji={label:'',val:5};
+let moodTag='';
+
+function getToday(){return new Date().toISOString().slice(0,10);}
+function getWeekDates(){const n=new Date(),d=n.getDay(),r=[];for(let i=0;i<7;i++){const x=new Date(n);x.setDate(n.getDate()-d+i);r.push(x.toISOString().slice(0,10));}return r;}
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};}}
+function save(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+function getTodayLog(){const d=load();return(d.acts||{})[getToday()]||[];}
+function saveTodayLog(log){const d=load();if(!d.acts)d.acts={};d.acts[getToday()]=log;save(d);}
+function getDayPts(date){const d=load();return((d.acts||{})[date]||[]).reduce((s,e)=>s+e.pts,0);}
+function getWeekPts(){return getWeekDates().reduce((s,date)=>s+getDayPts(date),0);}
+function getBest(){const d=load();if(!d.acts)return 0;return Math.max(0,...Object.values(d.acts).map(l=>l.reduce((s,e)=>s+e.pts,0)));}
+function getMoodLog(){return load().mood||[];}
+function saveMoodLog(m){const d=load();d.mood=m;save(d);}
+
+function logAct(id){
+  const act=ACTS.find(a=>a.id===id);if(!act)return;
+  const log=getTodayLog();
+  const n=new Date();
+  const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+  log.push({id,name:act.name,pts:act.pts,time:t});
+  saveTodayLog(log);render();
+}
+function undoEntry(idx){const log=getTodayLog();log.splice(idx,1);saveTodayLog(log);render();}
+function resetDay(){if(!confirm('Reset today\'s entries?'))return;const d=load();if(!d.acts)d.acts={};d.acts[getToday()]=[];save(d);render();}
+
+function pickEmoji(el,label,val){
+  document.querySelectorAll('.ebtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  moodEmoji={label,val};
+  document.getElementById('sl-mood').value=val;
+  document.getElementById('sv-mood').textContent=val;
+}
+function pickTag(el){
+  document.querySelectorAll('.mtag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  moodTag=el.textContent;
+}
+function saveMood(){
+  const mood=parseInt(document.getElementById('sl-mood').value);
+  const energy=parseInt(document.getElementById('sl-energy').value);
+  const anxiety=parseInt(document.getElementById('sl-anxiety').value);
+  const conf=parseInt(document.getElementById('sl-conf').value);
+  const note=document.getElementById('mood-note').value.trim();
+  const pts=getDayPts(getToday());
+  const entry={date:getToday(),emoji:moodEmoji.label||'',mood,energy,anxiety,conf,tag:moodTag,note,pts};
+  const log=getMoodLog();
+  const existing=log.findIndex(e=>e.date===getToday());
+  if(existing>=0)log[existing]=entry;else log.push(entry);
+  saveMoodLog(log);
+  alert('Mood saved!');
+  render();
+}
+
+function sw(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-'+tab).classList.add('active');
+}
+
+const EMOJI_MAP={awful:'😞',low:'😕',meh:'😐',good:'🙂',great:'😄'};
+
+function render(){
+  const today=getToday();
+  const log=getTodayLog();
+  const todayPts=log.reduce((s,e)=>s+e.pts,0);
+  const weekPts=getWeekPts();
+  const best=getBest();
+
+  document.getElementById('date-lbl').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const st=document.getElementById('s-today');
+  st.textContent=(todayPts>0?'+':'')+todayPts;
+  st.className='sv'+(todayPts>0?' pos':todayPts<0?' neg':'');
+  const sw2=document.getElementById('s-week');
+  sw2.textContent=(weekPts>0?'+':'')+weekPts;
+  sw2.className='sv'+(weekPts>0?' pos':weekPts<0?' neg':'');
+  document.getElementById('s-best').textContent='+'+best;
+  const pct=Math.min(100,Math.round(Math.max(0,weekPts)/35*100));
+  document.getElementById('pb-fill').style.width=pct+'%';
+  document.getElementById('pb-lbl').textContent=weekPts+' / 35 pts';
+
+  const lc={};log.forEach(e=>{lc[e.id]=(lc[e.id]||0)+1;});
+  ['mind','body','career','joy','shadow','morning','penalty'].forEach(cat=>{
+    const g=document.getElementById('g-'+cat);g.innerHTML='';
+    ACTS.filter(a=>a.cat===cat).forEach(act=>{
+      const cnt=lc[act.id]||0;const isPen=cat==='penalty';
+      const btn=document.createElement('button');
+      btn.className='abtn'+(isPen?' pen':'')+(cnt>0?' logged':'');
+      btn.onclick=()=>logAct(act.id);
+      btn.innerHTML='<span class="aname">'+act.name+(cnt>1?' ×'+cnt:'')+'</span><span class="apts '+(act.pts>=0?'pos':'neg')+'">'+(act.pts>0?'+':'')+act.pts+(cnt>0?' ✓':'')+'</span>';
+      g.appendChild(btn);
+    });
+  });
+
+  const ll=document.getElementById('log-list');
+  if(!log.length){ll.innerHTML='<div class="empty">Nothing logged yet today.</div>';}
+  else{
+    ll.innerHTML='';
+    [...log].reverse().forEach((e,ri)=>{
+      const idx=log.length-1-ri;
+      const div=document.createElement('div');div.className='li';
+      div.innerHTML='<div><div class="li-name">'+e.name+'</div><div class="li-time">'+e.time+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600;color:'+(e.pts>=0?'#0F6E56':'#c0392b')+'">'+(e.pts>0?'+':'')+e.pts+'</span><button class="ubtn" onclick="undoEntry('+idx+')">undo</button></div>';
+      ll.appendChild(div);
+    });
+  }
+
+  const moodLog=getMoodLog();
+  const mh=document.getElementById('mood-history');
+  if(!moodLog.length){mh.innerHTML='<div class="empty">No mood entries yet.</div>';}
+  else{
+    mh.innerHTML='';
+    [...moodLog].reverse().slice(0,14).forEach(m=>{
+      const div=document.createElement('div');div.className='mood-hist-item';
+      const ec=EMOJI_MAP[m.emoji]||'';
+      const ds=new Date(m.date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+      div.innerHTML='<div class="mhi-top"><span class="mhi-date">'+ds+'</span><span class="mhi-emoji">'+ec+'</span></div>'
+        +'<div class="mhi-bars">'
+        +'<div class="mhi-bar"><div class="mhi-bl">Mood</div><div class="mhi-bv">'+m.mood+'/10</div></div>'
+        +'<div class="mhi-bar"><div class="mhi-bl">Energy</div><div class="mhi-bv">'+m.energy+'/10</div></div>'
+        +'<div class="mhi-bar"><div class="mhi-bl">Anxiety</div><div class="mhi-bv">'+m.anxiety+'/10</div></div>'
+        +'<div class="mhi-bar"><div class="mhi-bl">Confidence</div><div class="mhi-bv">'+m.conf+'/10</div></div>'
+        +'</div>'
+        +(m.tag?'<span class="mhi-tag">'+m.tag+'</span>':'')
+        +(m.pts!==undefined?'<span class="mhi-tag" style="background:#e8f7f1;color:#085041">'+(m.pts>=0?'+':'')+m.pts+' pts</span>':'')
+        +(m.note?'<div class="mhi-note">'+m.note+'</div>':'');
+      mh.appendChild(div);
+    });
+  }
+
+  const avgDiv=document.getElementById('avg-bars');
+  avgDiv.innerHTML='';
+  if(moodLog.length){
+    const recent=moodLog.slice(-7);
+    const avg=k=>Math.round(recent.reduce((s,m)=>s+m[k],0)/recent.length*10)/10;
+    [{key:'mood',label:'Overall mood',color:'#7F77DD'},{key:'energy',label:'Energy',color:'#1D9E75'},{key:'anxiety',label:'Anxiety',color:'#D85A30'},{key:'conf',label:'Confidence',color:'#378ADD'}].forEach(m=>{
+      const val=avg(m.key);
+      const div=document.createElement('div');div.className='chart-row';
+      div.innerHTML='<span class="chart-lbl">'+m.label+'</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:'+Math.round(val/10*100)+'%;background:'+m.color+'"></div></div><span class="chart-val">'+val.toFixed(1)+'</span>';
+      avgDiv.appendChild(div);
+    });
+  } else {avgDiv.innerHTML='<div class="empty">Log mood for a few days to see averages.</div>';}
+
+  const corrDiv=document.getElementById('corr-section');
+  corrDiv.innerHTML='';
+  if(moodLog.length>=3){
+    const hi=moodLog.filter(m=>m.pts>=10);
+    const lo=moodLog.filter(m=>m.pts<5);
+    if(hi.length){const am=Math.round(hi.reduce((s,m)=>s+m.mood,0)/hi.length*10)/10;const c=document.createElement('div');c.className='corr-card';c.innerHTML='<div class="corr-title">On high-scoring days (10+ pts)</div><div class="corr-sub">Average mood: <strong>'+am+'/10</strong> across '+hi.length+' day(s)</div>';corrDiv.appendChild(c);}
+    if(lo.length){const am=Math.round(lo.reduce((s,m)=>s+m.mood,0)/lo.length*10)/10;const c=document.createElement('div');c.className='corr-card';c.innerHTML='<div class="corr-title">On low-scoring days (under 5 pts)</div><div class="corr-sub">Average mood: <strong>'+am+'/10</strong> across '+lo.length+' day(s)</div>';corrDiv.appendChild(c);}
+    if(!hi.length&&!lo.length){corrDiv.innerHTML='<div class="empty">Keep logging — patterns will appear soon.</div>';}
+  } else {corrDiv.innerHTML='<div class="empty">Log mood for 3+ days to see correlations.</div>';}
+
+  const tagDiv=document.getElementById('tag-freq');tagDiv.innerHTML='';
+  const freq={};moodLog.forEach(m=>{if(m.tag)freq[m.tag]=(freq[m.tag]||0)+1;});
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(sorted.length){const row=document.createElement('div');row.className='tag-wrap';sorted.forEach(([tag,count])=>{const s=document.createElement('span');s.className='mtag active';s.style.cursor='default';s.textContent=tag+' ('+count+'×)';row.appendChild(s);});tagDiv.appendChild(row);}
+  else{tagDiv.innerHTML='<div class="empty">Tags will appear here once you start logging mood.</div>';}
+
+  const wg=document.getElementById('week-grid');wg.innerHTML='';
+  getWeekDates().forEach(date=>{
+    const pts=getDayPts(date);
+    const cell=document.createElement('div');
+    cell.className='dc'+(date===today?' today':'')+(pts>=5?' win':'');
+    cell.innerHTML='<div class="dn">'+DAYS[new Date(date+'T12:00:00').getDay()]+'</div><div class="dp">'+(pts===0?'–':(pts>0?'+':'')+pts)+'</div>';
+    wg.appendChild(cell);
+  });
+
+  const earn=document.getElementById('rules-earn');const lose=document.getElementById('rules-lose');
+  earn.innerHTML='';lose.innerHTML='';
+  ACTS.filter(a=>a.pts>0).forEach(a=>{const d=document.createElement('div');d.className='rr';d.innerHTML='<span>'+a.name+'</span><span class="rpts pos">+'+a.pts+'</span>';earn.appendChild(d);});
+  ACTS.filter(a=>a.pts<0).forEach(a=>{const d=document.createElement('div');d.className='rr';d.innerHTML='<span>'+a.name+'</span><span class="rpts neg">'+a.pts+'</span>';lose.appendChild(d);});
+}
+
+render();
+</script>
+</body>
+</html>
